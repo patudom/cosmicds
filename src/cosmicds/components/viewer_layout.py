@@ -19,7 +19,8 @@ def ToolBar(viewer):
             viewer.toolbar,
         ],
         margin=0,
-        style= {"background-color": "var(--primary)", "border-bottom-left-radius": "0px", "border-bottom-right-radius": "0px"},
+        style= {"border-bottom-left-radius": "0px", "border-bottom-right-radius": "0px"},
+        classes=["toolbar"],
     )
 
 @solara.component
