@@ -115,6 +115,7 @@ class GlobalState(BaseState):
     show_team_interface: Reactive[bool] = dataclasses.field(default=Reactive(False))
     allow_advancing: Reactive[bool] = dataclasses.field(default=Reactive(True))
     speech: Speech = dataclasses.field(default_factory=Speech)
+    piggybank_total: Reactive[int] = dataclasses.field(default=Reactive(0))
 
     def __post_init__(self):
         # self._data_collection = DataCollection()
