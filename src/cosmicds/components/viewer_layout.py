@@ -1,46 +1,38 @@
-from cosmicds.utils import make_figure_autoresize
 import solara
-import reacton.ipyvuetify as rv
-
-__all__ = ["ToolBar", "ViewerLayout"]
-
-
-@solara.component
-def ToolBar(viewer):
-    if viewer.state.title is not None:
-        title = viewer.state.title
-    else:
-        title = ""
-
-    solara.Row(
-        children=[
-            solara.Text(title, style={"padding-left": "1ch", "text-transform": "uppercase", "height": "48px", "align-content": "center", "font-size": "1.3rem"}),
-            solara.v.Spacer(),
-            viewer.toolbar,
-        ],
-        margin=0,
-        style= {"background-color": "var(--primary)", "border-bottom-left-radius": "0px", "border-bottom-right-radius": "0px", "color": "white"},
-    )
+from glue.viewers.common.viewer import Viewer
+from reacton import ipyvuetify as rv
+from cosmicds.utils import make_figure_autoresize
 
 @solara.component
-def ViewerLayout(viewer):
-    make_figure_autoresize(viewer.figure_widget, 400)
-    # viewer.figure_widget.layout.height = 600
-    layout = solara.Column(
-        children=[
-            ToolBar(viewer),
-            viewer.figure_widget,
-        ],
-        gap="0px",
-        margin=0,
-        style={
-            "height": "100%",
-            "width": "100%",
-            "box-shadow": "0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12) !important;",
-        },
-        classes=["elevation-2"],
-    )
-    with rv.Card(
-        children=[layout]
-    ):
-        pass
+def ViewerLayout(viewer: Viewer, height=400):
+    with rv.Card() as main:
+        with rv.Toolbar(dense=True, class_="toolbar"):
+            with rv.ToolbarTitle():
+                title_container = rv.Html(tag="div", class_ = "toolbar-title")
+
+            rv.Spacer()
+            toolbar_container = rv.Html(tag="div")
+
+        viewer_container = rv.Html(tag="div", style_=f"width: 100%; height: {height}px")
+
+        def _setup():
+            title_widget = solara.get_widget(title_container)
+            title_widget.children = (viewer.state.title or "VIEWER",)
+
+            toolbar_widget = solara.get_widget(toolbar_container)
+            toolbar_widget.children = (viewer.toolbar,)
+
+            viewer_widget = solara.get_widget(viewer_container)
+            viewer_widget.children = (viewer.figure_widget,)
+
+            make_figure_autoresize(viewer.figure_widget, 400)
+
+            def cleanup():
+                for cnt in (title_widget, toolbar_widget, viewer_widget):
+                    cnt.children = ()
+
+            return cleanup
+
+        solara.use_effect(_setup, dependencies=[])
+
+    return main        
